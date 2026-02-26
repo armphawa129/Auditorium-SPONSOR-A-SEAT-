@@ -3,14 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Auditorium - Public View (Mobile Ready)</title>
+    <title>Auditorium - Public View (Fixed Zoom & Title)</title>
     <style>
         :root { --gold: #ffd700; --dark-gold: #b8860b; --bg-dark: #0f172a; --seat-blue: #1e40af; --stair-step: rgba(255, 255, 255, 0.05); --danger: #ef4444; --highlight: #22c55e; }
-        body { background-color: var(--bg-dark); color: white; font-family: 'Segoe UI', Arial, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px 0; margin: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        
+        body { 
+            background-color: var(--bg-dark); 
+            color: white; 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); display: none; justify-content: center; align-items: center; z-index: 5000; font-weight: bold; color: var(--gold); }
-        .search-container { margin-bottom: 30px; position: sticky; top: 20px; z-index: 1000; width: 90%; max-width: 400px; }
+        
+        /* แก้ไขเพื่อให้เลื่อนซ้าย-ขวาได้สุดในมือถือ */
+        .scroll-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            display: block; /* สำคัญ: ยอมให้เลื่อนได้ */
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .search-container { margin: 0 auto 30px auto; position: sticky; left: 0; top: 0; z-index: 1000; width: 90%; max-width: 400px; }
         #seatSearch { width: 100%; padding: 12px 20px; border-radius: 50px; border: 2px solid var(--gold); background: rgba(30, 41, 59, 0.9); color: white; font-size: 16px; outline: none; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); backdrop-filter: blur(10px); }
-        .cinema-container { display: flex; flex-direction: column-reverse; align-items: center; gap: 10px; padding: 40px 10px; background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); position: relative; min-width: 750px; }
+
+        /* ปรับแต่ง Container ให้เลื่อนได้จริงไม่ถูกตัดขอบซ้าย */
+        .cinema-container { 
+            display: inline-flex; /* ใช้ inline-flex เพื่อให้ container กว้างตามเนื้อหา */
+            flex-direction: column-reverse; 
+            align-items: center; 
+            gap: 10px; 
+            padding: 40px 50px; /* เพิ่ม padding ข้างเพื่อให้ซูมแล้วไม่ชิดขอบเกินไป */
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); 
+            position: relative; 
+            min-width: 800px; /* ล็อคความกว้างขั้นต่ำ */
+            margin: 0 auto;
+        }
+
         .zone { display: flex; flex-direction: column; gap: 8px; margin-bottom: 50px; position: relative; }
         .row { display: flex; align-items: center; justify-content: center; position: relative; }
         .row-label { width: 45px; font-weight: bold; text-align: center; color: #64748b; font-size: 13px; }
@@ -20,23 +54,31 @@
         .stairs-center { width: 126px; height: 18px; background: linear-gradient(to bottom, transparent 50%, rgba(255,255,255,0.08) 50%); background-size: 100% 4px; border-left: 1px solid #475569; border-right: 1px solid #475569; display: flex; align-items: center; justify-content: center; }
         .stairs-center::after { content: "stairs"; font-size: 8px; color: #475569; text-transform: uppercase; }
         .control-desk-box { position: absolute; width: 335px; height: 44px; background: #1e293b; border: 2px solid var(--gold); border-radius: 4px; z-index: 100; top: -2px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: var(--gold); letter-spacing: 1px; }
-        .seat { width: 18px; height: 18px; background-color: var(--seat-blue); color: white; font-size: 8px; display: flex; align-items: center; justify-content: center; border-radius: 3px 3px 1px 1px; cursor: pointer; transition: 0.3s; border: 1px solid rgba(255,255,255,0.1); }
+        
+        .seat { width: 18px; height: 18px; background-color: var(--seat-blue); color: white; font-size: 8px; display: flex; align-items: center; justify-content: center; border-radius: 3px 3px 1px 1px; cursor: default; transition: 0.3s; border: 1px solid rgba(255,255,255,0.1); }
         .seat.booked { background: linear-gradient(145deg, var(--gold), var(--dark-gold)); color: #5c4033; font-weight: bold; }
         .seat.search-match { transform: scale(1.8); z-index: 100; box-shadow: 0 0 15px var(--highlight); border: 2px solid var(--highlight); }
         .stage { width: 650px; height: 50px; background: linear-gradient(to top, #475569, #1e293b); border-radius: 100px 100px 0 0; display: flex; align-items: center; justify-content: center; font-weight: bold; letter-spacing: 10px; margin-bottom: 60px; border-top: 2px solid #94a3b8; }
-        .status-bar { position: fixed; bottom: 20px; background: rgba(15, 23, 42, 0.95); padding: 10px 30px; border: 2px solid var(--gold); border-radius: 50px; z-index: 2000; font-weight: bold; font-size: 14px; }
+        .status-bar { position: fixed; bottom: 20px; background: rgba(15, 23, 42, 0.95); padding: 10px 30px; border: 2px solid var(--gold); border-radius: 50px; z-index: 2000; font-weight: bold; font-size: 14px; left: 50%; transform: translateX(-50%); white-space: nowrap; }
     </style>
 </head>
 <body>
-    <div id="loader">LOADING PLAN...</div>
-    <div class="search-container"><input type="text" id="seatSearch" placeholder="🔍 Search owner name..." oninput="handleSearch()"></div>
-    <div class="cinema-container">
-        <div class="stage">STAGE</div>
-        <div id="lowerZone" class="zone"></div>
-        <div id="midZone" class="zone"></div>
-        <div id="upperZone" class="zone"></div>
+    <div id="loader">REFRESHING DATA...</div>
+    
+    <div class="search-container">
+        <input type="text" id="seatSearch" placeholder="🔍 Search owner name..." oninput="handleSearch()">
     </div>
-    <div class="status-bar">Booked: <span id="bookedCount">0</span> / 720</div>
+
+    <div class="scroll-wrapper">
+        <div class="cinema-container">
+            <div class="stage">STAGE</div>
+            <div id="lowerZone" class="zone"></div>
+            <div id="midZone" class="zone"></div>
+            <div id="upperZone" class="zone"></div>
+        </div>
+    </div>
+
+    <div class="status-bar">Booked: <span id="bookedCount">0</span> / 720 Seats</div>
 
     <script>
         const isAdmin = false; 
@@ -98,9 +140,14 @@
                     const saved = data[s.id];
                     if (saved) {
                         s.dataset.displayName = saved.disp;
-                        s.classList.add('booked'); s.innerText = '★';
+                        s.classList.add('booked'); 
+                        s.innerText = '★';
+                        // --- แก้ไขตรงนี้: ใส่ชื่อเจ้าของกลับเข้าใน Title ---
+                        s.title = "Owner: " + saved.disp;
                     } else {
-                        s.classList.remove('booked'); s.innerText = s.dataset.originalNo;
+                        s.classList.remove('booked'); 
+                        s.innerText = s.dataset.originalNo;
+                        s.removeAttribute('title');
                     }
                 });
                 document.getElementById('bookedCount').innerText = document.querySelectorAll('.seat.booked').length;
