@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Auditorium - Public View (Full Access Zoom)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=0.5, minimum-scale=0.1, maximum-scale=3.0, user-scalable=yes">
+    <title>Auditorium - Public View (Fluid Mobile)</title>
     <style>
         :root { --gold: #ffd700; --dark-gold: #b8860b; --bg-dark: #0f172a; --seat-blue: #1e40af; --stair-step: rgba(255, 255, 255, 0.05); --danger: #ef4444; --highlight: #22c55e; }
         
@@ -16,45 +16,41 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            /* ป้องกันการเด้งของหน้าจอเวลาเลื่อนสุด */
+            overscroll-behavior: none;
         }
 
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); display: none; justify-content: center; align-items: center; z-index: 5000; font-weight: bold; color: var(--gold); }
         
-        /* จุดที่แก้ไข: ตัวหุ้มการเลื่อนที่ฉลาดขึ้น */
         .scroll-wrapper {
             width: 100%;
-            overflow-x: auto;
+            overflow: auto; /* เปิดการเลื่อนทุกทิศทาง */
             -webkit-overflow-scrolling: touch;
-            display: block; /* เปลี่ยนจาก flex เป็น block เพื่อให้ margin auto ของลูกทำงานได้ถูกต้อง */
-            text-align: center; /* ช่วยจัดกึ่งกลางในคอม */
+            display: flex;
+            justify-content: center;
+            /* เปิดการกวาดนิ้วแบบอิสระทแยงมุม */
+            touch-action: pan-x pan-y; 
+        }
+
+        @media (max-width: 850px) {
+            .scroll-wrapper {
+                justify-content: flex-start;
+            }
         }
 
         .search-container { margin: 0 auto 30px auto; position: sticky; left: 0; top: 0; z-index: 1000; width: 90%; max-width: 400px; }
         #seatSearch { width: 100%; padding: 12px 20px; border-radius: 50px; border: 2px solid var(--gold); background: rgba(30, 41, 59, 0.9); color: white; font-size: 16px; outline: none; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); backdrop-filter: blur(10px); }
 
-        /* ปรับปรุง Cinema Container ให้เลื่อนซ้ายได้สุด */
         .cinema-container { 
             display: inline-flex;
             flex-direction: column-reverse; 
             align-items: center; 
             gap: 10px; 
-            padding: 40px 60px;
+            padding: 60px 100px; /* เพิ่มพื้นที่รอบๆ เพื่อให้ซูมออกแล้วไม่ติดขอบ */
             background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); 
             position: relative; 
             min-width: 800px;
-            margin: 0 auto; /* จัดกึ่งกลางในคอม แต่ถ้าที่ว่างไม่พอจะชิดซ้ายอัตโนมัติ */
-            text-align: left;
-        }
-
-        /* สำหรับมือถือ: บังคับให้เริ่มจากซ้ายสุด */
-        @media (max-width: 850px) {
-            .scroll-wrapper {
-                text-align: left; 
-            }
-            .cinema-container {
-                margin: 0; 
-                padding-left: 20px; /* ลดระยะห่างด้านซ้ายให้พอดีกับมือถือ */
-            }
+            margin: 0 auto;
         }
 
         .zone { display: flex; flex-direction: column; gap: 8px; margin-bottom: 50px; position: relative; }
@@ -75,7 +71,7 @@
     </style>
 </head>
 <body>
-    <div id="loader">REFRESHING DATA...</div>
+    <div id="loader">SYNCHRONIZING...</div>
     
     <div class="search-container">
         <input type="text" id="seatSearch" placeholder="🔍 Search owner name..." oninput="handleSearch()">
