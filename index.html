@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Auditorium - Public View (Touch Info Enabled)</title>
+    <title>Auditorium - Public View (Full Access Zoom)</title>
     <style>
         :root { --gold: #ffd700; --dark-gold: #b8860b; --bg-dark: #0f172a; --seat-blue: #1e40af; --stair-step: rgba(255, 255, 255, 0.05); --danger: #ef4444; --highlight: #22c55e; }
         
@@ -20,22 +20,19 @@
 
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); display: none; justify-content: center; align-items: center; z-index: 5000; font-weight: bold; color: var(--gold); }
         
+        /* จุดที่แก้ไข: ตัวหุ้มการเลื่อนที่ฉลาดขึ้น */
         .scroll-wrapper {
             width: 100%;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
-            display: flex;
-            justify-content: center;
-        }
-
-        @media (max-width: 850px) {
-            .scroll-wrapper { justify-content: flex-start; }
-            .cinema-container { margin: 0; }
+            display: block; /* เปลี่ยนจาก flex เป็น block เพื่อให้ margin auto ของลูกทำงานได้ถูกต้อง */
+            text-align: center; /* ช่วยจัดกึ่งกลางในคอม */
         }
 
         .search-container { margin: 0 auto 30px auto; position: sticky; left: 0; top: 0; z-index: 1000; width: 90%; max-width: 400px; }
         #seatSearch { width: 100%; padding: 12px 20px; border-radius: 50px; border: 2px solid var(--gold); background: rgba(30, 41, 59, 0.9); color: white; font-size: 16px; outline: none; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); backdrop-filter: blur(10px); }
 
+        /* ปรับปรุง Cinema Container ให้เลื่อนซ้ายได้สุด */
         .cinema-container { 
             display: inline-flex;
             flex-direction: column-reverse; 
@@ -45,6 +42,19 @@
             background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); 
             position: relative; 
             min-width: 800px;
+            margin: 0 auto; /* จัดกึ่งกลางในคอม แต่ถ้าที่ว่างไม่พอจะชิดซ้ายอัตโนมัติ */
+            text-align: left;
+        }
+
+        /* สำหรับมือถือ: บังคับให้เริ่มจากซ้ายสุด */
+        @media (max-width: 850px) {
+            .scroll-wrapper {
+                text-align: left; 
+            }
+            .cinema-container {
+                margin: 0; 
+                padding-left: 20px; /* ลดระยะห่างด้านซ้ายให้พอดีกับมือถือ */
+            }
         }
 
         .zone { display: flex; flex-direction: column; gap: 8px; margin-bottom: 50px; position: relative; }
@@ -134,10 +144,8 @@
             seat.onclick = () => { 
                 const seatName = `Row ${rowName} - Seat ${seatNumber}`;
                 if (seat.classList.contains('booked')) {
-                    // ถ้าจองแล้ว บอกชื่อเจ้าของ
                     alert(`${seatName}\n------------------\nStatus: Booked\nOwner: ${seat.dataset.displayName}`);
                 } else {
-                    // ถ้ายังไม่จอง บอกให้ติดต่อ Staff
                     alert(`${seatName}\n------------------\nStatus: Available\nPlease contact our staff to reserve this seat.`);
                 }
             };
