@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=0.5, minimum-scale=0.1, maximum-scale=3.0, user-scalable=yes">
-    <title>Auditorium - Public View (Fluid Mobile)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.1, maximum-scale=5.0, user-scalable=yes">
+    <title>Auditorium - Public View (Final Fix)</title>
     <style>
         :root { --gold: #ffd700; --dark-gold: #b8860b; --bg-dark: #0f172a; --seat-blue: #1e40af; --stair-step: rgba(255, 255, 255, 0.05); --danger: #ef4444; --highlight: #22c55e; }
         
@@ -12,33 +12,35 @@
             color: white; 
             font-family: 'Segoe UI', Arial, sans-serif; 
             margin: 0; 
-            padding: 20px 0;
-            display: flex;
-            flex-direction: column;
+            padding: 0;
+            display: block; /* เปลี่ยนเพื่อให้ Scroll ทำงานแม่นยำขึ้น */
             min-height: 100vh;
-            /* ป้องกันการเด้งของหน้าจอเวลาเลื่อนสุด */
-            overscroll-behavior: none;
         }
 
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); display: none; justify-content: center; align-items: center; z-index: 5000; font-weight: bold; color: var(--gold); }
         
+        /* ส่วนที่สำคัญที่สุด: ควบคุมพื้นที่การเลื่อน */
         .scroll-wrapper {
             width: 100%;
-            overflow: auto; /* เปิดการเลื่อนทุกทิศทาง */
+            overflow: auto;
             -webkit-overflow-scrolling: touch;
+            padding: 20px 0;
             display: flex;
-            justify-content: center;
-            /* เปิดการกวาดนิ้วแบบอิสระทแยงมุม */
-            touch-action: pan-x pan-y; 
+            justify-content: center; /* กึ่งกลางสำหรับจอใหญ่ */
         }
 
+        /* สำหรับมือถือ: บังคับให้ชิดซ้ายเพื่อให้เลื่อนไปซ้ายสุดได้ */
         @media (max-width: 850px) {
             .scroll-wrapper {
                 justify-content: flex-start;
+                padding-left: 0;
+            }
+            .search-container {
+                margin-left: 20px !important;
             }
         }
 
-        .search-container { margin: 0 auto 30px auto; position: sticky; left: 0; top: 0; z-index: 1000; width: 90%; max-width: 400px; }
+        .search-container { margin: 20px auto 30px auto; position: sticky; left: 20px; top: 20px; z-index: 1000; width: 90%; max-width: 400px; }
         #seatSearch { width: 100%; padding: 12px 20px; border-radius: 50px; border: 2px solid var(--gold); background: rgba(30, 41, 59, 0.9); color: white; font-size: 16px; outline: none; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); backdrop-filter: blur(10px); }
 
         .cinema-container { 
@@ -46,11 +48,10 @@
             flex-direction: column-reverse; 
             align-items: center; 
             gap: 10px; 
-            padding: 60px 100px; /* เพิ่มพื้นที่รอบๆ เพื่อให้ซูมออกแล้วไม่ติดขอบ */
+            padding: 60px 80px;
             background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); 
             position: relative; 
-            min-width: 800px;
-            margin: 0 auto;
+            min-width: 800px; /* ความกว้างของผัง */
         }
 
         .zone { display: flex; flex-direction: column; gap: 8px; margin-bottom: 50px; position: relative; }
