@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Auditorium - Public View (Fixed Zoom & Title)</title>
+    <title>Auditorium - Public View (Touch Info Enabled)</title>
     <style>
         :root { --gold: #ffd700; --dark-gold: #b8860b; --bg-dark: #0f172a; --seat-blue: #1e40af; --stair-step: rgba(255, 255, 255, 0.05); --danger: #ef4444; --highlight: #22c55e; }
         
@@ -15,34 +15,36 @@
             padding: 20px 0;
             display: flex;
             flex-direction: column;
-            align-items: center;
             min-height: 100vh;
         }
 
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); display: none; justify-content: center; align-items: center; z-index: 5000; font-weight: bold; color: var(--gold); }
         
-        /* แก้ไขเพื่อให้เลื่อนซ้าย-ขวาได้สุดในมือถือ */
         .scroll-wrapper {
             width: 100%;
             overflow-x: auto;
-            display: block; /* สำคัญ: ยอมให้เลื่อนได้ */
             -webkit-overflow-scrolling: touch;
+            display: flex;
+            justify-content: center;
+        }
+
+        @media (max-width: 850px) {
+            .scroll-wrapper { justify-content: flex-start; }
+            .cinema-container { margin: 0; }
         }
 
         .search-container { margin: 0 auto 30px auto; position: sticky; left: 0; top: 0; z-index: 1000; width: 90%; max-width: 400px; }
         #seatSearch { width: 100%; padding: 12px 20px; border-radius: 50px; border: 2px solid var(--gold); background: rgba(30, 41, 59, 0.9); color: white; font-size: 16px; outline: none; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); backdrop-filter: blur(10px); }
 
-        /* ปรับแต่ง Container ให้เลื่อนได้จริงไม่ถูกตัดขอบซ้าย */
         .cinema-container { 
-            display: inline-flex; /* ใช้ inline-flex เพื่อให้ container กว้างตามเนื้อหา */
+            display: inline-flex;
             flex-direction: column-reverse; 
             align-items: center; 
             gap: 10px; 
-            padding: 40px 50px; /* เพิ่ม padding ข้างเพื่อให้ซูมแล้วไม่ชิดขอบเกินไป */
+            padding: 40px 60px;
             background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); 
             position: relative; 
-            min-width: 800px; /* ล็อคความกว้างขั้นต่ำ */
-            margin: 0 auto;
+            min-width: 800px;
         }
 
         .zone { display: flex; flex-direction: column; gap: 8px; margin-bottom: 50px; position: relative; }
@@ -55,7 +57,7 @@
         .stairs-center::after { content: "stairs"; font-size: 8px; color: #475569; text-transform: uppercase; }
         .control-desk-box { position: absolute; width: 335px; height: 44px; background: #1e293b; border: 2px solid var(--gold); border-radius: 4px; z-index: 100; top: -2px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: var(--gold); letter-spacing: 1px; }
         
-        .seat { width: 18px; height: 18px; background-color: var(--seat-blue); color: white; font-size: 8px; display: flex; align-items: center; justify-content: center; border-radius: 3px 3px 1px 1px; cursor: default; transition: 0.3s; border: 1px solid rgba(255,255,255,0.1); }
+        .seat { width: 18px; height: 18px; background-color: var(--seat-blue); color: white; font-size: 8px; display: flex; align-items: center; justify-content: center; border-radius: 3px 3px 1px 1px; cursor: pointer; transition: 0.3s; border: 1px solid rgba(255,255,255,0.1); }
         .seat.booked { background: linear-gradient(145deg, var(--gold), var(--dark-gold)); color: #5c4033; font-weight: bold; }
         .seat.search-match { transform: scale(1.8); z-index: 100; box-shadow: 0 0 15px var(--highlight); border: 2px solid var(--highlight); }
         .stage { width: 650px; height: 50px; background: linear-gradient(to top, #475569, #1e293b); border-radius: 100px 100px 0 0; display: flex; align-items: center; justify-content: center; font-weight: bold; letter-spacing: 10px; margin-bottom: 60px; border-top: 2px solid #94a3b8; }
@@ -128,7 +130,17 @@
             const seat = document.createElement('div');
             seat.className = 'seat'; seat.id = seatId; seat.innerText = seatNumber;
             seat.dataset.originalNo = seatNumber;
-            seat.onclick = () => { if (!isAdmin) alert("Please contact staff to reserve."); };
+            
+            seat.onclick = () => { 
+                const seatName = `Row ${rowName} - Seat ${seatNumber}`;
+                if (seat.classList.contains('booked')) {
+                    // ถ้าจองแล้ว บอกชื่อเจ้าของ
+                    alert(`${seatName}\n------------------\nStatus: Booked\nOwner: ${seat.dataset.displayName}`);
+                } else {
+                    // ถ้ายังไม่จอง บอกให้ติดต่อ Staff
+                    alert(`${seatName}\n------------------\nStatus: Available\nPlease contact our staff to reserve this seat.`);
+                }
+            };
             parent.appendChild(seat);
         }
 
@@ -142,12 +154,12 @@
                         s.dataset.displayName = saved.disp;
                         s.classList.add('booked'); 
                         s.innerText = '★';
-                        // --- แก้ไขตรงนี้: ใส่ชื่อเจ้าของกลับเข้าใน Title ---
                         s.title = "Owner: " + saved.disp;
                     } else {
                         s.classList.remove('booked'); 
                         s.innerText = s.dataset.originalNo;
                         s.removeAttribute('title');
+                        s.dataset.displayName = "";
                     }
                 });
                 document.getElementById('bookedCount').innerText = document.querySelectorAll('.seat.booked').length;
