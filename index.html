@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.1, maximum-scale=5.0, user-scalable=yes">
-    <title>Auditorium - Public View (Final Fix)</title>
+    <title>Auditorium - Public View (Full Access)</title>
     <style>
         :root { --gold: #ffd700; --dark-gold: #b8860b; --bg-dark: #0f172a; --seat-blue: #1e40af; --stair-step: rgba(255, 255, 255, 0.05); --danger: #ef4444; --highlight: #22c55e; }
         
@@ -13,36 +13,44 @@
             font-family: 'Segoe UI', Arial, sans-serif; 
             margin: 0; 
             padding: 0;
-            display: block; /* เปลี่ยนเพื่อให้ Scroll ทำงานแม่นยำขึ้น */
             min-height: 100vh;
         }
 
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); display: none; justify-content: center; align-items: center; z-index: 5000; font-weight: bold; color: var(--gold); }
         
-        /* ส่วนที่สำคัญที่สุด: ควบคุมพื้นที่การเลื่อน */
+        /* ส่วนหุ้มที่ยอมให้เลื่อนได้ทุกทิศทาง */
         .scroll-wrapper {
             width: 100%;
             overflow: auto;
             -webkit-overflow-scrolling: touch;
             padding: 20px 0;
-            display: flex;
-            justify-content: center; /* กึ่งกลางสำหรับจอใหญ่ */
+            text-align: center; /* จัดกึ่งกลางสำหรับคอม */
         }
 
-        /* สำหรับมือถือ: บังคับให้ชิดซ้ายเพื่อให้เลื่อนไปซ้ายสุดได้ */
-        @media (max-width: 850px) {
-            .scroll-wrapper {
-                justify-content: flex-start;
-                padding-left: 0;
-            }
-            .search-container {
-                margin-left: 20px !important;
-            }
+        .search-container { 
+            margin: 20px auto 30px auto; 
+            position: sticky; 
+            left: 20px; 
+            top: 20px; 
+            z-index: 1000; 
+            width: 90%; 
+            max-width: 400px; 
+        }
+        
+        #seatSearch { 
+            width: 100%; 
+            padding: 12px 20px; 
+            border-radius: 50px; 
+            border: 2px solid var(--gold); 
+            background: rgba(30, 41, 59, 0.9); 
+            color: white; 
+            font-size: 16px; 
+            outline: none; 
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); 
+            backdrop-filter: blur(10px); 
         }
 
-        .search-container { margin: 20px auto 30px auto; position: sticky; left: 20px; top: 20px; z-index: 1000; width: 90%; max-width: 400px; }
-        #seatSearch { width: 100%; padding: 12px 20px; border-radius: 50px; border: 2px solid var(--gold); background: rgba(30, 41, 59, 0.9); color: white; font-size: 16px; outline: none; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); backdrop-filter: blur(10px); }
-
+        /* Cinema Container: ใช้ inline-block เพื่อให้กว้างตามจริงและเลื่อนได้สุด */
         .cinema-container { 
             display: inline-flex;
             flex-direction: column-reverse; 
@@ -51,7 +59,8 @@
             padding: 60px 80px;
             background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); 
             position: relative; 
-            min-width: 800px; /* ความกว้างของผัง */
+            min-width: 800px;
+            margin: 0 auto; /* หัวใจสำคัญ: จัดกลางเมื่อจอกว้าง ชิดซ้ายเมื่อจอแคบ */
         }
 
         .zone { display: flex; flex-direction: column; gap: 8px; margin-bottom: 50px; position: relative; }
@@ -67,6 +76,7 @@
         .seat { width: 18px; height: 18px; background-color: var(--seat-blue); color: white; font-size: 8px; display: flex; align-items: center; justify-content: center; border-radius: 3px 3px 1px 1px; cursor: pointer; transition: 0.3s; border: 1px solid rgba(255,255,255,0.1); }
         .seat.booked { background: linear-gradient(145deg, var(--gold), var(--dark-gold)); color: #5c4033; font-weight: bold; }
         .seat.search-match { transform: scale(1.8); z-index: 100; box-shadow: 0 0 15px var(--highlight); border: 2px solid var(--highlight); }
+        
         .stage { width: 650px; height: 50px; background: linear-gradient(to top, #475569, #1e293b); border-radius: 100px 100px 0 0; display: flex; align-items: center; justify-content: center; font-weight: bold; letter-spacing: 10px; margin-bottom: 60px; border-top: 2px solid #94a3b8; }
         .status-bar { position: fixed; bottom: 20px; background: rgba(15, 23, 42, 0.95); padding: 10px 30px; border: 2px solid var(--gold); border-radius: 50px; z-index: 2000; font-weight: bold; font-size: 14px; left: 50%; transform: translateX(-50%); white-space: nowrap; }
     </style>
